@@ -5,7 +5,6 @@
   "license": "MIT",
   "dependencies": {
     "@snapshot-labs/snapshot.js": "^0.3.91",
-    "csv": "^6.1.0",
     "csv-load-sync": "^2.3.1",
     "ethers": "^5.6.8",
     "lodash": "^4.17.21"
