@@ -19,7 +19,7 @@ var winners = [];
 var citydao = '0x7eef591a6cc0403b9652e98e88476fe1bf31ddeb'
 var abi = [{"inputs":[{"internalType":"address[]","name":"accounts","type":"address[]"},{"internalType":"uint256[]","name":"ids","type":"uint256[]"}],"name":"balanceOfBatch","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"}],"stateMutability":"view","type":"function"}]
 
-var provider = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com/")
+var provider = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com/") // Replace with infura or other reliable provider
 var contract = new ethers.Contract(citydao, abi, provider);
 
 const convertToAddress = async (name) => {
@@ -35,13 +35,13 @@ const processAddresses = async () => {
   var addresses = [];
   for (var i = 0; i < original_addresses.length; i++) {
     if (original_addresses[i].address) {
-      var address = await convertToAddress(original_addresses[i].address)
+      var address = await convertToAddress(original_addresses[i].address) // convert names to addresses
       addresses.push(address)
     }
   }
 
-  unique_addresses = lodash.uniq(addresses.map((x) => {return x.toLowerCase()}));
-  calculateWinners()
+  unique_addresses = lodash.uniq(addresses.map((x) => {return x.toLowerCase()})); // dedup the addresses.
+  await calculateWinners()
 }
 
 
@@ -54,8 +54,12 @@ const calculateWinners = async () => {
     var score = scores.reduce(((total, score) => score[address]), 0)
 
     if (scores[0][address] > 0 || scores[1][address] > 0 || scores[2][address] > 0) {
+      // Address has voted on snapshot.
+
       balances = await contract.balanceOfBatch([address, address, address], [7, 42, 69]);
       if (balances[0].gt(0) || balances[1].gt(0) || balances[2].gt(0)) {
+        // Address owns a city DAO NFT
+
         console.log(address)
         winners.push(address)
         winner = true
