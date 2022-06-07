@@ -1,9 +1,6 @@
 const ethers = require('ethers')
 const snapshot = require('./snap.js')
 const lodash = require("lodash")
-const fs = require("fs");
-const { parse } = require("csv-parse");
-
 const {load} = require('csv-load-sync');
 
 var original_addresses = [];
@@ -60,7 +57,7 @@ const calculateWinners = async () => {
       if (balances[0].gt(0) || balances[1].gt(0) || balances[2].gt(0)) {
         // Address owns a city DAO NFT
 
-        console.log(address)
+        console.log(await convertToName(address))
         winners.push(address)
         winner = true
       }
