@@ -1,24 +1,25 @@
-const ethers = require('ethers');
-const snapshot = require('./snap.js');
-const lodash = require("lodash");
-const {load} = require('csv-load-sync');
+const ethers    = require('ethers');
+const snapshot  = require('./snap.js');
+const lodash    = require("lodash");
+const {load}    = require('csv-load-sync');
+const fs        = require('fs');
 
 if (!!!process.argv[2]) {
   console.log("please send CSV file as argument");
   return;
 }
 
-var winners = [];
+const winners = [];
 
-var citydao = '0x7eef591a6cc0403b9652e98e88476fe1bf31ddeb'; // citydao NFT address
-var abi = [{"inputs":[{"internalType":"address[]","name":"accounts","type":"address[]"},{"internalType":"uint256[]","name":"ids","type":"uint256[]"}],"name":"balanceOfBatch","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"}],"stateMutability":"view","type":"function"}]; // balanceOfBatch ABI
+const citydao = '0x7eef591a6cc0403b9652e98e88476fe1bf31ddeb'; // citydao NFT address
+const abi = [{"inputs":[{"internalType":"address[]","name":"accounts","type":"address[]"},{"internalType":"uint256[]","name":"ids","type":"uint256[]"}],"name":"balanceOfBatch","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"}],"stateMutability":"view","type":"function"}]; // balanceOfBatch ABI
 
-var provider = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com/"); // Replace with infura or other reliable provider
-var contract = new ethers.Contract(citydao, abi, provider);
+const provider = new ethers.providers.JsonRpcProvider("https://cloudflare-eth.com/"); // Replace with infura or other reliable provider
+const contract = new ethers.Contract(citydao, abi, provider);
 
 const convertToAddress = async (name) => {
   // converts the .eth address to resolved address. Returns address itself if name is an address
-  var address = await provider.resolveName(name.trim());
+  const address = await provider.resolveName(name.trim());
 
   if (address) {
     return address.toLowerCase();
@@ -29,12 +30,12 @@ const convertToAddress = async (name) => {
 
 const convertToName = async (address) => {
   // converts address to .eth address if available
-  var name = await provider.lookupAddress(address);
+  const name = await provider.lookupAddress(address);
   return name || address;
 }
 
 const processAddresses = async () => {
-  var addresses = [];
+  const addresses = [];
   for (var i = 0; i < original_addresses.length; i++) {
     if (original_addresses[i].address) {
       var address = await convertToAddress(original_addresses[i].address); // convert names to addresses
@@ -53,9 +54,9 @@ const calculateWinners = async (addresses) => {
   // Randomly calculates 125 winners
 
   // dedup the addresses.
-  var unique_addresses = lodash.uniq(addresses.map((x) => {return x.toLowerCase()}));
+  const unique_addresses = lodash.uniq(addresses.map((x) => {return x.toLowerCase()}));
 
-  for (var i = 0; i < 125; i++) {
+  for (var i = 0; i < 5; i++) {
     var winner = false;
 
     // generate a random number between 0 and length - 1 of unique_addresses array
@@ -86,8 +87,11 @@ const calculateWinners = async (addresses) => {
 
     unique_addresses.splice(index, 1);
   }
+
+  const content = "winners\n" + winners.join("\n");
+  fs.writeFileSync('./winners.csv', content);
 }
 
 
-var original_addresses = load(process.argv[2]); // load csv file
+const original_addresses = load(process.argv[2]); // load csv file
 processAddresses(); // run the main function
